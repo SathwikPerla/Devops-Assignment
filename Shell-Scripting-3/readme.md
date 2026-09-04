@@ -8,21 +8,16 @@
 
 ---
 
-## Task Overview
+## What the Script Does
 
-Create an interactive Bash shell script named `system_info.sh` that automates system diagnostics and process reporting.
-
-### Core Requirements:
-- [x] Prints the current date (`date`).
-- [x] Prints the system hostname (`hostname`).
-- [x] Prints the logged-in username (`whoami`).
-- [x] Prints disk usage (`df -h`).
-- [x] Prints running processes (`ps aux`).
-- [x] Uses shell variables to store and display information.
-- [x] Takes user input using `read -p`.
-- [x] Creates a directory using `mkdir`.
-- [x] Creates a file using `touch`.
-- [x] Stores running process information in the file using `>` output redirection.
+- Stores the current date, hostname, and active username into variables using `$()`
+- Prints system disk space usage with `df -h`
+- Displays running system processes with `ps aux`
+- Takes user inputs for directory name and log filename via `read -p`
+- Creates the target directory (`process_reports`) using `mkdir`
+- Creates the log file (`processes.log`) inside the directory using `touch`
+- Dumps running process information into the file using `ps aux >` output redirection
+- Verifies the saved report by printing the first 5 lines using `head -n 5`
 
 ---
 

@@ -170,7 +170,7 @@ Instantly redirect 100% of traffic to Green pods by updating the service selecto
 kubectl apply -f 02-blue-green/service-green.yaml
 curl http://$(minikube ip):30020
 ```
-![alt text](image-9.png)
+![Green Environment Promoted](image-9.png)
 
 ---
 
@@ -180,7 +180,7 @@ Confirm that the service endpoints now point to Green pods:
 kubectl describe svc myapp-service | grep Selector
 kubectl get endpoints myapp-service
 ```
-![alt text](image-10.png)
+![Green Selector and Endpoints](image-10.png)
 
 ---
 
@@ -190,7 +190,7 @@ Roll back to Blue in milliseconds by repointing the selector:
 kubectl apply -f 02-blue-green/service-blue.yaml
 curl http://$(minikube ip):30020
 ```
-![alt text](<Screenshot 2026-09-21 at 12.47.13 AM.png>)
+![Rollback to Blue](<Screenshot 2026-09-21 at 12.47.13 AM.png>)
 
 ---
 
@@ -200,7 +200,7 @@ Delete the old Blue deployment once Green is confirmed stable:
 kubectl delete deployment app-blue
 kubectl get pods -l app=myapp --show-labels
 ```
-![alt text](image-11.png)
+![Decommission Blue](image-11.png)
 
 ---
 
@@ -209,3 +209,178 @@ kubectl get pods -l app=myapp --show-labels
 kubectl delete -f 02-blue-green/service-green.yaml
 kubectl delete -f 02-blue-green/deployment-green.yaml
 ```
+
+---
+
+# Part 3: Canary Deployment
+
+## Overview
+A Canary Deployment rolls out a new software version to a small percentage of users before a full release. In Kubernetes, this is achieved by running two deployments (`app-stable` and `app-canary`) behind a single Service with a common label (`app=myapp-canary`). Traffic is distributed proportionally based on replica counts (e.g., 9 stable pods vs. 1 canary pod = 90% / 10% traffic split).
+
+---
+
+### Step 1: Deploy Stable v1 (9 Pods = 90% Traffic)
+Deploy the stable version running 9 replicas:
+```bash
+kubectl apply -f 03-canary/deployment-stable.yaml
+kubectl rollout status deployment/app-stable
+```
+
+---
+
+### Step 2: Deploy the Service
+Create the service that routes traffic across both stable and canary pods:
+```bash
+kubectl apply -f 03-canary/service.yaml
+```
+
+---
+
+### Step 3: Test — All Traffic Goes to Stable v1
+Test that 100% of traffic routes to v1 before canary is introduced:
+```bash
+for i in $(seq 1 10); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
+```
+![All Traffic to Stable v1](image-12.png)
+
+---
+
+### Step 4: Deploy the Canary v2 Pod (1 Pod = 10% Traffic)
+Deploy 1 replica of the v2 canary version to test in production with real traffic:
+```bash
+kubectl apply -f 03-canary/deployment-canary.yaml
+kubectl get pods -l app=myapp-canary --show-labels
+```
+![Canary Pod Deployed](image-13.png)
+
+---
+
+### Step 5: Verify Traffic Split in Real Time
+Run multiple requests to verify traffic routing (~90% Stable, ~10% Canary):
+```bash
+for i in $(seq 1 20); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
+```
+![Traffic Split 90/10](image-14.png)
+
+---
+
+### Step 6: Increase Canary Traffic to 30% (3 out of 10 Pods)
+Scale canary up to 3 replicas and scale stable down to 7 replicas:
+```bash
+kubectl scale deployment app-canary --replicas=3
+kubectl scale deployment app-stable --replicas=7
+kubectl get endpoints myapp-canary-service
+```
+
+Re-test the traffic distribution (~70% Stable, ~30% Canary):
+```bash
+for i in $(seq 1 10); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
+```
+![Traffic Split 70/30](image-15.png)
+
+---
+
+### Step 7A: Promote Canary to 100% (Canary is Healthy)
+Once verified stable, scale canary to 100% and scale down stable:
+```bash
+kubectl scale deployment app-canary --replicas=9
+kubectl scale deployment app-stable --replicas=0
+for i in $(seq 1 5); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
+```
+![Canary Promoted to 100%](image-16.png)
+
+Clean up old stable deployment:
+```bash
+kubectl delete deployment app-stable
+```
+
+---
+
+### Step 7B: Rollback Canary (If Canary Fails)
+If errors occur during canary testing, immediately roll back by scaling canary to 0:
+```bash
+kubectl scale deployment app-canary --replicas=0
+kubectl scale deployment app-stable --replicas=9
+for i in $(seq 1 5); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
+```
+![Canary Rollback](image-17.png)
+
+---
+
+### Cleanup
+```bash
+kubectl delete -f 03-canary/service.yaml
+kubectl delete -f 03-canary/deployment-canary.yaml
+kubectl delete -f 03-canary/deployment-stable.yaml
+```
+
+---
+
+
+---
+
+# Part 4: Recreate Deployment Strategy
+
+### Step 1: Deploy Version 1 (3 Replicas)
+Deploy version 1 and the NodePort service:
+```bash
+kubectl apply -f 04-recreate/deployment-v1.yaml
+kubectl apply -f 04-recreate/service.yaml
+kubectl get pods -l app=app-recreate
+```
+Test web access:
+```bash
+curl http://localhost:8080
+```
+![Version 1 Deployed](image-18.png)
+
+---
+
+### Step 2: Trigger the Recreate Update & Watch Pod Lifecycle
+In Terminal 1, watch the pod transitions in real-time:
+```bash
+kubectl get pods -l app=app-recreate -w
+```
+In Terminal 2, trigger the v2 update:
+```bash
+kubectl apply -f 04-recreate/deployment-v2.yaml
+```
+*(Notice the downtime window: all v1 pods terminate completely before v2 containers start)*
+![Recreate Downtime Transition](image-19.png)
+
+---
+
+### Step 3: Observe Outage Window via Continuous Curl
+Run a continuous loop during the recreate rollout to observe the brief outage:
+```bash
+while true; do curl -s --connect-timeout 1 http://localhost:8080 | grep -o 'VERSION: [^<]*' || echo "[OUTAGE] Connection failed"; sleep 0.5; done
+```
+![Outage During Transition](image-20.png)
+
+---
+
+### Step 4: Verify Version 2 Live
+Confirm all v2 pods are running and serving upgraded traffic:
+```bash
+curl http://localhost:8080
+```
+![Version 2 Promoted](image-21.png)
+
+---
+
+### Step 5: Rollback Demonstration
+Revert from v2 back to v1:
+```bash
+kubectl rollout undo deployment/app-recreate
+kubectl rollout status deployment/app-recreate
+```
+![Rollback to v1](image-22.png)
+
+---
+
+### Cleanup
+```bash
+kubectl delete -f 04-recreate/service.yaml
+kubectl delete -f 04-recreate/deployment-v2.yaml
+```
+

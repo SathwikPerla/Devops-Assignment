@@ -9,7 +9,7 @@ kubectl apply -f 01-configmap/app-config.yaml
 kubectl get configmap yatri-app-config
 kubectl describe configmap yatri-app-config
 ```
-![ConfigMap Created and Inspected](image-1.png)
+![ConfigMap Created and Inspected](01-configmap/screenshots/image-1.png)
 
 ---
 
@@ -22,7 +22,7 @@ kubectl get configmap yatri-app-config -o jsonpath='{.data.LOG_LEVEL}'
 ```text
 INFO
 ```
-![Read ConfigMap Live Value](image-2.png)
+![Read ConfigMap Live Value](01-configmap/screenshots/image-2.png)
 
 ---
 
@@ -44,7 +44,7 @@ echo -n "yatri_production_db" | base64
 kubectl apply -f 02-secret/db-secret.yaml
 kubectl get secret yatri-db-secret
 ```
-![Secret Created and Inspected](image-3.png)
+![Secret Created and Inspected](02-secret/screenshots/image-3.png)
 
 ---
 
@@ -58,7 +58,7 @@ kubectl get secret yatri-db-secret -o jsonpath='{.data.POSTGRES_PASSWORD}' | bas
 ```text
 secretpassword
 ```
-![Secret Decoded Live](image-4.png)
+![Secret Decoded Live](02-secret/screenshots/image-4.png)
 
 ---
 
@@ -78,7 +78,7 @@ kubectl apply -f 03-ingress/ingress-routes.yaml
 kubectl get ingress yatri-ingress
 kubectl describe ingress yatri-ingress
 ```
-![Path-Based Ingress Routes](image-5.png)
+![Path-Based Ingress Routes](03-ingress/screenshots/image-5.png)
 
 ---
 
@@ -96,7 +96,7 @@ kubectl create secret tls campus-tls-cert \
 
 kubectl get secret campus-tls-cert
 ```
-![TLS Certificate and Secret](image-6.png)
+![TLS Certificate and Secret](03-ingress/screenshots/image-6.png)
 
 ---
 
@@ -106,7 +106,7 @@ Apply the TLS ingress configuration for multiple virtual hosts:
 kubectl apply -f 03-ingress/ingress-tls.yaml
 kubectl get ingress campus-ingress-tls
 ```
-![TLS Multi-Host Ingress](image-7.png)
+![TLS Multi-Host Ingress](03-ingress/screenshots/image-7.png)
 
 ---
 
@@ -121,7 +121,7 @@ curl -k --resolve portal.campus.local:443:$INGRESS_IP https://portal.campus.loca
 # Test Host 2: API with HTTPS
 curl -k --resolve api.campus.local:443:$INGRESS_IP https://api.campus.local/api/health
 ```
-![Curl Host and TLS Verification](image-8.png)
+![Curl Host and TLS Verification](03-ingress/screenshots/image-8.png)
 
 ---
 
@@ -146,7 +146,7 @@ kubectl apply -f 04-full-demo/frontend.yaml
 kubectl apply -f 04-full-demo/backend.yaml
 kubectl get pods -l 'app in (yatri-frontend, yatri-backend)'
 ```
-![Microservices Deployment](image-9.png)
+![Microservices Deployment](04-full-demo/screenshots/image-9.png)
 
 ---
 
@@ -156,7 +156,7 @@ Deploy the path-based Ingress routing `/api` to the backend and `/` to the front
 kubectl apply -f 04-full-demo/ingress.yaml
 kubectl describe ingress yatri-ingress
 ```
-![Full Demo Ingress Configuration](image-10.png)
+![Full Demo Ingress Configuration](04-full-demo/screenshots/image-10.png)
 
 ---
 
@@ -169,7 +169,7 @@ curl http://yatri.local/
 # Test Backend API (at /api/)
 curl http://yatri.local/api/
 ```
-![Verify Frontend and Backend Traffic](image-11.png)
+![Verify Frontend and Backend Traffic](04-full-demo/screenshots/image-11.png)
 
 ---
 
@@ -179,7 +179,7 @@ Verify that ConfigMap and Secret environment variables are properly injected int
 kubectl exec -it deploy/yatri-backend -- env | grep -E "ENVIRONMENT|LOG_LEVEL|POSTGRES"
 kubectl get secret yatri-db-secret -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 --decode
 ```
-![Environment Variables and Secret Decoded](image-12.png)
+![Environment Variables and Secret Decoded](04-full-demo/screenshots/image-12.png)
 
 ---
 

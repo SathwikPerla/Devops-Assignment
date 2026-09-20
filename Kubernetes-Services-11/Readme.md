@@ -40,7 +40,7 @@ kubectl get pods -l app=web-clusterip -o wide
 All 3 backend pods are healthy and running with distinct internal overlay IP addresses (`10.244.0.x`).
 
 ### Evidence
-![Backend Pods Running](<Screenshot 2026-09-18 at 12.17.59 AM.png>)
+![Backend Pods Running](<01-clusterip/screenshots/Screenshot 2026-09-18 at 12.17.59 AM.png>)
 
 ---
 
@@ -77,7 +77,7 @@ kubectl get svc web-service-clusterip
 - **Port:** `8080/TCP` -> Target Port `80/TCP`
 
 ### Evidence
-![ClusterIP Service Created](<Screenshot 2026-09-17 at 12.06.18 PM.png>)
+![ClusterIP Service Created](<01-clusterip/screenshots/Screenshot 2026-09-17 at 12.06.18 PM.png>)
 
 ---
 
@@ -99,7 +99,7 @@ web-service-clusterip   10.244.0.5:80,10.244.0.6:80,10.244.0.7:80   56s
 All 3 backend pod IPs (`10.244.0.5:80`, `10.244.0.6:80`, `10.244.0.7:80`) are actively registered under `web-service-clusterip`.
 
 ### Evidence
-![Service Endpoints](<Screenshot 2026-09-17 at 12.06.56 PM.png>)
+![Service Endpoints](<01-clusterip/screenshots/Screenshot 2026-09-17 at 12.06.56 PM.png>)
 
 ---
 
@@ -113,7 +113,7 @@ kubectl get pod curl-client
 ```
 
 ### Evidence
-![Client Pod Status](<Screenshot 2026-09-17 at 12.08.39 PM.png>)
+![Client Pod Status](<01-clusterip/screenshots/Screenshot 2026-09-17 at 12.08.39 PM.png>)
 
 ---
 
@@ -129,7 +129,7 @@ kubectl exec -it curl-client -- curl -s http://web-service-clusterip:8080
 - **Result:** Successfully returned `<h1>Welcome to nginx!</h1>`.
 - **Mechanism:** CoreDNS mapped `web-service-clusterip` to ClusterIP `10.96.18.32`, and `kube-proxy` routed the request to one of the backend pods on port 80.
 
-![Access via Short DNS Name](<Screenshot 2026-09-17 at 12.11.05 PM.png>)
+![Access via Short DNS Name](<01-clusterip/screenshots/Screenshot 2026-09-17 at 12.11.05 PM.png>)
 
 ---
 
@@ -141,7 +141,7 @@ kubectl exec -it curl-client -- curl -s http://10.96.18.32:8080
 - **Result:** Successfully returned `<h1>Welcome to nginx!</h1>`.
 - **Mechanism:** Direct TCP connection to `10.96.18.32:8080`, translated and load-balanced via `iptables`/`ipvs` rules managed by `kube-proxy`.
 
-![Access via ClusterIP Address](<Screenshot 2026-09-17 at 12.13.51 PM.png>)
+![Access via ClusterIP Address](<01-clusterip/screenshots/Screenshot 2026-09-17 at 12.13.51 PM.png>)
 
 ---
 
@@ -153,7 +153,7 @@ kubectl exec -it curl-client -- curl -s http://web-service-clusterip.default.svc
 - **Result:** Successfully returned `<h1>Welcome to nginx!</h1>`.
 - **Mechanism:** Resolves across namespaces within the Kubernetes cluster domain hierarchy, confirming cross-namespace addressability.
 
-![Access via FQDN](<Screenshot 2026-09-17 at 12.14.13 PM.png>)
+![Access via FQDN](<01-clusterip/screenshots/Screenshot 2026-09-17 at 12.14.13 PM.png>)
 
 ---
 
@@ -190,7 +190,7 @@ kubectl apply -f 02-nodeport/app-deployment.yaml
 kubectl get pods -l app=web-nodeport -o wide
 ```
 
-![alt text](<Screenshot 2026-09-18 at 1.26.43 AM.png>)
+![alt text](<02-nodeport/screenshots/Screenshot 2026-09-18 at 1.26.43 AM.png>)
 
 ---
 
@@ -200,7 +200,7 @@ kubectl apply -f 02-nodeport/service.yaml
 kubectl get svc web-service-nodeport
 ```
 
-![alt text](<Screenshot 2026-09-18 at 1.26.56 AM.png>)
+![alt text](<02-nodeport/screenshots/Screenshot 2026-09-18 at 1.26.56 AM.png>)
 
 ---
 
@@ -209,7 +209,7 @@ kubectl get svc web-service-nodeport
 kubectl get endpoints web-service-nodeport
 ```
 
-![alt text](<Screenshot 2026-09-18 at 1.27.58 AM.png>)
+![alt text](<02-nodeport/screenshots/Screenshot 2026-09-18 at 1.27.58 AM.png>)
 
 ---
 
@@ -225,7 +225,7 @@ curl -i http://localhost:30080
 ```
 *(Alternatively, query the node IP directly via the test client pod: `kubectl exec -it curl-client -- curl -i http://172.23.0.2:30080`)*
 
-![alt text](<Screenshot 2026-09-18 at 1.45.57 AM.png>)
+![alt text](<02-nodeport/screenshots/Screenshot 2026-09-18 at 1.45.57 AM.png>)
 
 
 
@@ -234,7 +234,7 @@ curl -i http://localhost:30080
 ### 5. Access Application via Browser
 With `kubectl port-forward` running, open `http://localhost:30080` in your web browser:
 
-![alt text](<Screenshot 2026-09-18 at 1.45.27 AM.png>)
+![alt text](<02-nodeport/screenshots/Screenshot 2026-09-18 at 1.45.27 AM.png>)
 
 
 
@@ -252,7 +252,7 @@ kubectl apply -f 03-loadbalancer/app-deployment.yaml
 kubectl get pods -l app=web-loadbalancer -o wide
 ```
 
-![alt text](<Screenshot 2026-09-18 at 3.51.28 AM.png>)
+![alt text](<03-loadbalancer/screenshots/Screenshot 2026-09-18 at 3.51.28 AM.png>)
 
 ---
 
@@ -262,7 +262,7 @@ kubectl apply -f 03-loadbalancer/service.yaml
 kubectl get svc web-service-loadbalancer
 ```
 
-![alt text](<Screenshot 2026-09-18 at 4.02.42 AM.png>)
+![alt text](<03-loadbalancer/screenshots/Screenshot 2026-09-18 at 4.02.42 AM.png>)
 
 ---
 
@@ -272,14 +272,14 @@ In Docker Desktop on macOS, the LoadBalancer automatically routes to `localhost`
 curl -i http://localhost
 ```
 
-![alt text](<Screenshot 2026-09-18 at 4.03.17 AM.png>)
+![alt text](<03-loadbalancer/screenshots/Screenshot 2026-09-18 at 4.03.17 AM.png>)
 
 ---
 
 ### 4. Access Application via Browser
 Accessing `http://localhost` from your web browser:
 
-![alt text](<Screenshot 2026-09-18 at 4.03.30 AM.png>)
+![alt text](<03-loadbalancer/screenshots/Screenshot 2026-09-18 at 4.03.30 AM.png>)
 
 ---
 
@@ -308,7 +308,7 @@ kubectl get svc external-database-service
 ```
 > Notice that `CLUSTER-IP` is `<none>` and `EXTERNAL-IP` is `api.github.com`.
 
-![alt text](<Screenshot 2026-09-18 at 4.08.38 AM.png>)
+![alt text](<04-externalname/screenshots/Screenshot 2026-09-18 at 4.08.38 AM.png>)
 
 ---
 
@@ -318,7 +318,7 @@ kubectl apply -f 04-externalname/client-pod.yaml
 kubectl get pod dns-test-client
 ```
 
-![alt text](<Screenshot 2026-09-18 at 4.09.05 AM.png>)
+![alt text](<04-externalname/screenshots/Screenshot 2026-09-18 at 4.09.05 AM.png>)
 
 ---
 
@@ -328,7 +328,7 @@ Verify that CoreDNS returns a CNAME pointing to `api.github.com`:
 kubectl exec -it dns-test-client -- nslookup external-database-service
 ```
 
-![alt text](<Screenshot 2026-09-18 at 4.09.27 AM.png>)
+![alt text](<04-externalname/screenshots/Screenshot 2026-09-18 at 4.09.27 AM.png>)
 
 ---
 
@@ -338,7 +338,7 @@ Send a request through the internal service name with the `Host` header:
 kubectl exec -it dns-test-client -- curl -s -k -H "Host: api.github.com" https://external-database-service
 ```
 
-![alt text](<Screenshot 2026-09-18 at 4.09.57 AM.png>)
+![alt text](<04-externalname/screenshots/Screenshot 2026-09-18 at 4.09.57 AM.png>)
 
 ---
 
@@ -368,7 +368,7 @@ kubectl get svc web-service-headless
 ```
 > Notice that `CLUSTER-IP` is explicitly `None`.
 
-![alt text](<Screenshot 2026-09-18 at 4.14.17 AM.png>)
+![alt text](<05-headless/screenshots/Screenshot 2026-09-18 at 4.14.17 AM.png>)
 
 ---
 
@@ -378,7 +378,7 @@ kubectl apply -f 05-headless/app-statefulset.yaml
 kubectl get pods -l app=web-headless -o wide
 ```
 
-![alt text](<Screenshot 2026-09-18 at 4.14.47 AM.png>)
+![alt text](<05-headless/screenshots/Screenshot 2026-09-18 at 4.14.47 AM.png>)
 
 ---
 
@@ -388,7 +388,7 @@ kubectl apply -f 05-headless/client-pod.yaml
 kubectl get pod headless-dns-client
 ```
 
-![alt text](<Screenshot 2026-09-18 at 4.15.04 AM.png>)
+![alt text](<05-headless/screenshots/Screenshot 2026-09-18 at 4.15.04 AM.png>)
 
 ---
 
@@ -398,7 +398,7 @@ kubectl exec -it headless-dns-client -- nslookup web-service-headless
 ```
 CoreDNS returns the individual IP of every backend pod instead of a single virtual IP.
 
-![alt text](<Screenshot 2026-09-18 at 4.15.19 AM.png>)
+![alt text](<05-headless/screenshots/Screenshot 2026-09-18 at 4.15.19 AM.png>)
 
 ---
 
@@ -409,7 +409,7 @@ kubectl exec -it headless-dns-client -- nslookup web-stateful-0.web-service-head
 kubectl exec -it headless-dns-client -- curl -s http://web-stateful-0.web-service-headless:80
 ```
 
-![alt text](<Screenshot 2026-09-18 at 4.15.54 AM.png>)
+![alt text](<05-headless/screenshots/Screenshot 2026-09-18 at 4.15.54 AM.png>)
 
 ---
 

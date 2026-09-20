@@ -32,7 +32,7 @@ kubectl get pods -l app=app-rolling --show-labels
 ```
 
 #### Evidence: Deployment v1 Running
-![alt text](image.png)
+![alt text](01-rolling-update/screenshots/image.png)
 
 
 ---
@@ -50,7 +50,7 @@ curl http://localhost:30010
 Or open in your browser: `http://localhost:30010` (or `minikube service app-rolling-service`).
 
 #### Evidence: Version 1 Web Page Output
-![alt text](image-1.png)
+![alt text](01-rolling-update/screenshots/image-1.png)
 
 ---
 
@@ -68,7 +68,7 @@ kubectl get pods -l app=app-rolling -w
 ```
 *(Notice new v2 pods transitioning from ContainerCreating to Running while v1 pods gradually terminate)*
 #### Evidence: Real-Time Pod Rollout Watch
-![Real-Time Rollout](image-2.png)
+![Real-Time Rollout](01-rolling-update/screenshots/image-2.png)
 
 ---
 
@@ -80,7 +80,7 @@ kubectl get pods -l app=app-rolling --show-labels
 ```
 
 #### Evidence: Deployment v2 Completed
-![Deployment v2](image-3.png)
+![Deployment v2](01-rolling-update/screenshots/image-3.png)
 
 ---
 
@@ -91,7 +91,7 @@ kubectl rollout history deployment/app-rolling
 ```
 
 #### Evidence: Rollout History
-![alt text](image-4.png)
+![alt text](01-rolling-update/screenshots/image-4.png)
 
 ---
 
@@ -107,7 +107,7 @@ kubectl get pods -l app=app-rolling --show-labels
 ```
 
 #### Evidence: Rollback to v1 Completed
-![alt text](image-5.png)
+![alt text](01-rolling-update/screenshots/image-5.png)
 
 ---
 
@@ -140,7 +140,7 @@ kubectl apply -f 02-blue-green/deployment-blue.yaml
 kubectl apply -f 02-blue-green/deployment-green.yaml
 kubectl get pods -l app=myapp --show-labels
 ```
-![alt text](image-6.png)
+![alt text](01-rolling-update/screenshots/image-6.png)
 
 ---
 
@@ -150,7 +150,7 @@ Route the service to Blue pods (`slot=blue`):
 kubectl apply -f 02-blue-green/service-blue.yaml
 curl http://$(minikube ip):30020
 ```
-![alt text](image-7.png)
+![alt text](01-rolling-update/screenshots/image-7.png)
 
 ---
 
@@ -160,7 +160,7 @@ Inspect the active selector and endpoints pointing to Blue pods:
 kubectl describe svc myapp-service | grep Selector
 kubectl get endpoints myapp-service
 ```
-![alt text](image-8.png)
+![alt text](02-blue-green/screenshots/image-8.png)
 
 ---
 
@@ -170,7 +170,7 @@ Instantly redirect 100% of traffic to Green pods by updating the service selecto
 kubectl apply -f 02-blue-green/service-green.yaml
 curl http://$(minikube ip):30020
 ```
-![Green Environment Promoted](image-9.png)
+![Green Environment Promoted](02-blue-green/screenshots/image-9.png)
 
 ---
 
@@ -180,7 +180,7 @@ Confirm that the service endpoints now point to Green pods:
 kubectl describe svc myapp-service | grep Selector
 kubectl get endpoints myapp-service
 ```
-![Green Selector and Endpoints](image-10.png)
+![Green Selector and Endpoints](02-blue-green/screenshots/image-10.png)
 
 ---
 
@@ -190,7 +190,7 @@ Roll back to Blue in milliseconds by repointing the selector:
 kubectl apply -f 02-blue-green/service-blue.yaml
 curl http://$(minikube ip):30020
 ```
-![Rollback to Blue](<Screenshot 2026-09-21 at 12.47.13 AM.png>)
+![Rollback to Blue](02-blue-green/screenshots/image-rollback.png)
 
 ---
 
@@ -200,7 +200,7 @@ Delete the old Blue deployment once Green is confirmed stable:
 kubectl delete deployment app-blue
 kubectl get pods -l app=myapp --show-labels
 ```
-![Decommission Blue](image-11.png)
+![Decommission Blue](02-blue-green/screenshots/image-11.png)
 
 ---
 
@@ -241,7 +241,7 @@ Test that 100% of traffic routes to v1 before canary is introduced:
 ```bash
 for i in $(seq 1 10); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
 ```
-![All Traffic to Stable v1](image-12.png)
+![All Traffic to Stable v1](03-canary/screenshots/image-12.png)
 
 ---
 
@@ -251,7 +251,7 @@ Deploy 1 replica of the v2 canary version to test in production with real traffi
 kubectl apply -f 03-canary/deployment-canary.yaml
 kubectl get pods -l app=myapp-canary --show-labels
 ```
-![Canary Pod Deployed](image-13.png)
+![Canary Pod Deployed](03-canary/screenshots/image-13.png)
 
 ---
 
@@ -260,7 +260,7 @@ Run multiple requests to verify traffic routing (~90% Stable, ~10% Canary):
 ```bash
 for i in $(seq 1 20); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
 ```
-![Traffic Split 90/10](image-14.png)
+![Traffic Split 90/10](03-canary/screenshots/image-14.png)
 
 ---
 
@@ -276,7 +276,7 @@ Re-test the traffic distribution (~70% Stable, ~30% Canary):
 ```bash
 for i in $(seq 1 10); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
 ```
-![Traffic Split 70/30](image-15.png)
+![Traffic Split 70/30](03-canary/screenshots/image-15.png)
 
 ---
 
@@ -287,7 +287,7 @@ kubectl scale deployment app-canary --replicas=9
 kubectl scale deployment app-stable --replicas=0
 for i in $(seq 1 5); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
 ```
-![Canary Promoted to 100%](image-16.png)
+![Canary Promoted to 100%](03-canary/screenshots/image-16.png)
 
 Clean up old stable deployment:
 ```bash
@@ -303,7 +303,7 @@ kubectl scale deployment app-canary --replicas=0
 kubectl scale deployment app-stable --replicas=9
 for i in $(seq 1 5); do curl -s http://localhost:8080 | grep -o "STABLE v1\|CANARY v2"; done
 ```
-![Canary Rollback](image-17.png)
+![Canary Rollback](03-canary/screenshots/image-17.png)
 
 ---
 
@@ -332,7 +332,7 @@ Test web access:
 ```bash
 curl http://localhost:8080
 ```
-![Version 1 Deployed](image-18.png)
+![Version 1 Deployed](04-recreate/screenshots/image-18.png)
 
 ---
 
@@ -346,7 +346,7 @@ In Terminal 2, trigger the v2 update:
 kubectl apply -f 04-recreate/deployment-v2.yaml
 ```
 *(Notice the downtime window: all v1 pods terminate completely before v2 containers start)*
-![Recreate Downtime Transition](image-19.png)
+![Recreate Downtime Transition](04-recreate/screenshots/image-19.png)
 
 ---
 
@@ -355,7 +355,7 @@ Run a continuous loop during the recreate rollout to observe the brief outage:
 ```bash
 while true; do curl -s --connect-timeout 1 http://localhost:8080 | grep -o 'VERSION: [^<]*' || echo "[OUTAGE] Connection failed"; sleep 0.5; done
 ```
-![Outage During Transition](image-20.png)
+![Outage During Transition](04-recreate/screenshots/image-20.png)
 
 ---
 
@@ -364,7 +364,7 @@ Confirm all v2 pods are running and serving upgraded traffic:
 ```bash
 curl http://localhost:8080
 ```
-![Version 2 Promoted](image-21.png)
+![Version 2 Promoted](04-recreate/screenshots/image-21.png)
 
 ---
 
@@ -374,7 +374,7 @@ Revert from v2 back to v1:
 kubectl rollout undo deployment/app-recreate
 kubectl rollout status deployment/app-recreate
 ```
-![Rollback to v1](image-22.png)
+![Rollback to v1](04-recreate/screenshots/image-22.png)
 
 ---
 

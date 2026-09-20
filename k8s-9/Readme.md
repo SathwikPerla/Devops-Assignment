@@ -46,7 +46,7 @@ minikube stop
 
 ### Evidence: Terminal Execution
 
-![alt text](<Screenshot 2026-09-18 at 7.10.21 PM.png>)
+![alt text](<screenshots/Screenshot 2026-09-18 at 7.10.21 PM.png>)
 
 ---
 

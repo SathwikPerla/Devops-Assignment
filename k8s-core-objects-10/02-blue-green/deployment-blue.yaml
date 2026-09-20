@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-blue
+  labels:
+    app: myapp
+    slot: blue
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+      slot: blue
+  template:
+    metadata:
+      labels:
+        app: myapp
+        slot: blue
+        version: v1
+    spec:
+      containers:
+        - name: web
+          image: nginx:alpine
+          command:
+            - /bin/sh
+            - -c
+            - |
+              echo '<!DOCTYPE html><html><body style="background:#0d47a1;color:#fff;text-align:center;padding:50px;font-family:sans-serif;"><h1>BLUE ENVIRONMENT</h1><p>Version: v1 | Slot: BLUE (LIVE)</p></body></html>' > /usr/share/nginx/html/index.html
+              nginx -g "daemon off;"
+          ports:
+            - containerPort: 80

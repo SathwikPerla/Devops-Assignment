@@ -1,0 +1,28 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: app-monitoring-alerts
+  namespace: default
+  labels:
+    role: alert-rules
+spec:
+  groups:
+  - name: application.rules
+    rules:
+    - alert: HighCpuUsage
+      expr: sum(rate(container_cpu_usage_seconds_total{container="web"}[1m])) by (pod) > 0.8
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU utilization detected on pod {{ $labels.pod }}"
+        description: "Pod CPU usage is above 80% threshold for more than 2 minutes."
+
+    - alert: PodUnavailable
+      expr: kube_deployment_status_replicas_available{deployment="monitored-app"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Monitored application deployment has 0 available replicas"
+        description: "The application is currently completely unavailable to incoming traffic."

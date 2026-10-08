@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitops-workload
+  namespace: default
+  labels:
+    app: gitops-workload
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: gitops-workload
+  template:
+    metadata:
+      labels:
+        app: gitops-workload
+    spec:
+      containers:
+      - name: web
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: "25m"
+            memory: "32Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"

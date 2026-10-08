@@ -336,11 +336,328 @@ apps   Deployment  default    gitops-workload      Synced  Healthy        deploy
 
 ---
 
-## 3. Summary of Deliverables
+---
+
+# Task 4: Hands-On Prometheus (from `03-prometheus`)
+
+### 1. What is Prometheus?
+Prometheus is an open-source monitoring and alerting toolkit focused primarily on **metrics**.
+
+> *"Prometheus goes around asking applications: 'Give me your metrics.'"*
+
+---
+
+### 2. Architecture & Scraping Mechanism
+
+```text
+Application
+    |
+    | /metrics
+    v
+Prometheus (Pull / Scrape Engine)
+    |
+    v
+Time-Series Database (TSDB)
+```
+
+Prometheus uses a **pull-based** architecture, actively scraping HTTP endpoints (typically `/metrics`) exposed by targets at configured scrape intervals.
+
+---
+
+### 3. What is a Metric?
+A metric is a quantifiable value recorded over time:
+```text
+http_requests_total 150
+```
+
+Prometheus records time-series samples:
+```text
+10:00 -> 100 requests
+10:01 -> 120 requests
+10:02 -> 150 requests
+```
+These numerical data points can then be graphed to track trends, error spikes, and usage patterns.
+
+---
+
+### 4. Running Prometheus (`prometheus-demo/`)
+
+#### Starting the Container
+```bash
+docker compose up -d
+docker compose ps
+```
+
+**Output:**
+```text
+[+] Running 2/2
+ ✔ Network prometheus-demo_default       Created
+ ✔ Container session20-prometheus         Started
+
+NAME                   IMAGE                    COMMAND                  SERVICE      STATUS      PORTS
+session20-prometheus   prom/prometheus:v3.5.0   "/bin/prometheus --c…"   prometheus   running     0.0.0.0:9090->9090/tcp
+```
+![Prometheus Start](screenshots/07_prometheus_start.png)
+
+* Access Prometheus Web UI: `http://localhost:9090`
+* View Raw Scraped Metrics: `http://localhost:9090/metrics`
+
+---
+
+### 5. PromQL Queries & Target Health
+
+Querying target health with the `up` metric:
+```bash
+curl -s 'http://localhost:9090/api/v1/query?query=up'
+```
+
+**Output:**
+```json
+{
+  "status": "success",
+  "data": {
+    "resultType": "vector",
+    "result": [
+      {
+        "metric": {
+          "__name__": "up",
+          "instance": "prometheus:9090",
+          "job": "prometheus"
+        },
+        "value": [ 1791490631.662, "1" ]
+      }
+    ]
+  }
+}
+```
+* A value of `1` indicates that the target is healthy and actively reachable.
+
+![Prometheus Query Up](screenshots/08_prometheus_query_up.png)
+
+---
+
+### 6. Query Examples & Aggregations
+
+Evaluating PromQL aggregations:
+```bash
+curl -s 'http://localhost:9090/api/v1/query?query=sum(up)'
+```
+
+**Output:**
+```json
+{
+  "status": "success",
+  "data": {
+    "resultType": "vector",
+    "result": [
+      {
+        "metric": {},
+        "value": [ 1791490640.120, "1" ]
+      }
+    ]
+  }
+}
+```
+Other common queries evaluated:
+* `prometheus_http_requests_total`
+* `process_cpu_seconds_total`
+
+![Prometheus PromQL Metrics](screenshots/09_prometheus_promql_metrics.png)
+
+---
+
+### 7. Essential Prometheus Terminology
+
+| Term | Meaning | Example |
+| :--- | :--- | :--- |
+| **Target** | An entity or service endpoint Prometheus scrapes | `prometheus:9090` |
+| **Scrape** | An HTTP GET request retrieving `/metrics` data | Polling every `5s` |
+| **Metric** | A named, trackable time-series value | `http_requests_total` |
+| **Label** | Key-value pairs providing dimensional filtering | `job="prometheus"` |
+| **Query** | PromQL expression used to retrieve and aggregate metrics | `sum(up)` |
+
+---
+
+### 8. Practice Questions & Answers
+
+1. **What does Prometheus collect?**  
+   *Answer:* Numerical metrics formatted as time-series data.
+2. **What is a scrape?**  
+   *Answer:* The act of pulling metrics from an HTTP endpoint over a network connection.
+3. **What does `up` mean?**  
+   *Answer:* A metric indicating target reachability (`1` = healthy, `0` = unreachable).
+4. **What is PromQL?**  
+   *Answer:* Prometheus Query Language, used to filter, calculate, and aggregate metrics.
+5. **Is Prometheus primarily a metrics system or a log storage system?**  
+   *Answer:* Primarily a metrics system.
+
+---
+
+### 9. Teardown
+```bash
+docker compose down
+```
+
+---
+
+# Task 5: Hands-On Grafana (from `04-grafana`)
+
+### 1. What is Grafana?
+While Prometheus collects, stores, and evaluates metrics, Grafana provides the visual dashboarding layer.
+
+> ```text
+> Prometheus = Data Engine
+> Grafana    = Beautiful Visualization Dashboard
+> ```
+
+---
+
+### 2. End-to-End Metrics Visualization Architecture
+
+```text
+Application
+     |
+     v
+ Prometheus (Metrics Store & PromQL Engine)
+     |
+     v
+  Grafana (Visual Dashboards & Alert Panels)
+     |
+     v
+  Engineers & Operators
+```
+
+---
+
+### 3. Starting Prometheus & Grafana (`grafana-demo/`)
+
+#### Starting Both Services
+```bash
+docker compose up -d
+docker compose ps
+```
+
+**Output:**
+```text
+[+] Running 3/3
+ ✔ Network grafana-demo_default          Created
+ ✔ Container session20-prometheus         Running
+ ✔ Container session20-grafana            Started
+
+NAME                   IMAGE                    COMMAND                  SERVICE      STATUS      PORTS
+session20-grafana      grafana/grafana:12.1.1   "/run.sh"                grafana      running     0.0.0.0:3000->3000/tcp
+session20-prometheus   prom/prometheus:v3.5.0   "/bin/prometheus --c…"   prometheus   running     0.0.0.0:9090->9090/tcp
+```
+![Grafana Start](screenshots/10_grafana_start.png)
+
+* Prometheus URL: `http://localhost:9090`
+* Grafana URL: `http://localhost:3000` (Default credentials: `admin` / `admin`)
+
+---
+
+### 4. Connecting Prometheus Data Source in Grafana
+
+1. Navigate to **Connections** $\rightarrow$ **Data sources** $\rightarrow$ **Add data source**.
+2. Select **Prometheus**.
+3. Set Server URL to `http://prometheus:9090` (using internal Docker service networking).
+4. Click **Save & test**.
+
+Verification via Grafana API:
+```bash
+curl -s -u admin:admin http://localhost:3000/api/datasources/1/health
+```
+
+**Output:**
+```json
+{
+  "details": {
+    "application": "Prometheus",
+    "features": {
+      "rulerApiEnabled": false
+    }
+  },
+  "message": "Successfully queried the Prometheus API.",
+  "status": "OK"
+}
+```
+![Grafana Datasource Connected](screenshots/11_grafana_datasource_connected.png)
+
+---
+
+### 5. Creating a Stat Dashboard Panel
+
+1. Navigate to **Dashboards** $\rightarrow$ **New Dashboard** $\rightarrow$ **Add visualization**.
+2. Select the **Prometheus** data source.
+3. Query expression: `up`.
+4. Visualization Type: **Stat**.
+5. Result: Displays `1` indicating the target is operational and healthy.
+
+Query verification via Grafana Query API:
+```bash
+curl -s -u admin:admin 'http://localhost:3000/api/ds/query' -d '{"queries":[{"refId":"A","expr":"up"}]}'
+```
+
+**Output:**
+```json
+{
+  "results": {
+    "A": {
+      "status": 200,
+      "frames": [
+        {
+          "schema": {
+            "fields": [
+              { "name": "Time", "type": "time" },
+              { "name": "Value", "type": "number", "labels": { "instance": "prometheus:9090", "job": "prometheus" } }
+            ]
+          },
+          "data": {
+            "values": [ [ 1791490650000 ], [ 1 ] ]
+          }
+        }
+      ]
+    }
+  }
+}
+```
+![Grafana Stat Dashboard](screenshots/12_grafana_stat_dashboard.png)
+
+---
+
+### 6. Why Grafana?
+A single Grafana dashboard can synthesize multiple metrics across different services into an intuitive visual pane:
+
+```text
++-----------------------------------+-----------------------------------+
+| CPU Utilization                   | Memory Utilization                |
+| 72% [Normal]                      | 61% [Normal]                      |
++-----------------------------------+-----------------------------------+
+| Requests / Second                 | HTTP Error Rate                   |
+| 150 req/s                         | 1.2%                              |
++-----------------------------------+-----------------------------------+
+| End-to-End P99 Latency                                                |
+| 230 ms                                                            |
++-------------------------------------------------------------------+
+```
+
+Humans process graphs and color-coded status gauges much faster than raw logs or numeric rows.
+
+---
+
+### 7. Teardown
+```bash
+docker compose down
+```
+
+---
+
+## Summary of All Deliverables
 
 | Deliverable | Location | Description |
 | :--- | :--- | :--- |
 | **Monitoring Demo** | [`monitoring-demo/`](monitoring-demo/) | Deployment with resource limits, liveness & readiness probes, and Prometheus alert rules |
 | **GitOps Demo** | [`gitops-demo/`](gitops-demo/) | Declarative app manifests and ArgoCD Application custom resource for continuous sync |
-| **Observability Docs** | [`readme.md`](readme.md) | 4-line summaries covering Metrics, Logs, Traces, tools, and Kubernetes observability |
-| **Terminal Screenshots** | [`screenshots/`](screenshots/) | High-resolution terminal captures verifying live node/pod metrics, health probes, and GitOps sync |
+| **Prometheus Hands-on** | [`prometheus-demo/`](prometheus-demo/) | Dockerized Prometheus deployment, PromQL target queries, and metric evaluations |
+| **Grafana Hands-on** | [`grafana-demo/`](grafana-demo/) | Multi-container stack, Prometheus data source integration, and Stat dashboard panels |
+| **Complete Documentation** | [`readme.md`](readme.md) | 4-line summaries, architectures, PromQL queries, practice Q&A, and terminal screenshots |
+| **Terminal Screenshots** | [`screenshots/`](screenshots/) | High-resolution terminal captures verifying live cluster metrics, Prometheus, and Grafana |

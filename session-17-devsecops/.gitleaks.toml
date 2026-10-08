@@ -1,0 +1,16 @@
+# Gitleaks Secret Scanning Configuration
+title = "DevSecOps Gitleaks Policy"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Global allowlist for testing and mock data"
+paths = [
+  '''tests/''',
+  '''pytest.ini'''
+]
+regexes = [
+  '''dummy_token''',
+  '''example_key'''
+]

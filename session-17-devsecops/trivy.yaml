@@ -1,0 +1,11 @@
+# Trivy Container Vulnerability Scanning Policy
+severity:
+  - CRITICAL
+  - HIGH
+exit-code: 1
+ignore-unfixed: true
+vuln-type:
+  - os
+  - library
+format: table
+timeout: 5m0s

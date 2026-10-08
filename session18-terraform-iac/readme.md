@@ -28,6 +28,11 @@ session18-terraform-iac/
 │   ├── outputs.tf              # Resource outputs (ARN, ID, region)
 │   └── README.md               # Detailed lifecycle execution guide
 │
+├── screenshots/                # Visual command output evidence
+│   ├── 01_init_validate_plan.png
+│   ├── 02_provision_and_outputs.png
+│   └── 03_destroy_workflow.png
+│
 ├── aws-services/               # Task 2: AWS Services Research
 │   ├── 01-iam/
 │   │   └── README.md           # Governance, Users, Groups, Roles, Policies, Least Privilege
@@ -40,7 +45,7 @@ session18-terraform-iac/
 │   └── 05-dynamodb-rds/
 │       └── README.md           # Databases: DynamoDB (NoSQL) & RDS (Multi-AZ, Read Replicas)
 │
-└── readme.md                   # Master session overview
+└── readme.md                   # Master session overview with evidence
 ```
 
 ---
@@ -64,6 +69,26 @@ terraform destroy ◄── terraform output ◄── terraform show ◄── 
   * Server-Side Encryption (`AES256`)
   * Force Destroy enabled for clean teardown.
 * **Validation Outcome:** Validated syntax with `terraform validate` (`Success! The configuration is valid.`).
+
+---
+
+## 📷 Command Output Evidence
+
+### 1. Terraform Init, Validate & Plan
+
+![1. Terraform Init, Validate & Plan](screenshots/01_init_validate_plan.png)
+
+---
+
+### 2. Terraform S3 Provisioning & Outputs
+
+![2. Terraform S3 Provisioning & Outputs](screenshots/02_provision_and_outputs.png)
+
+---
+
+### 3. Terraform Destroy Workflow
+
+![3. Terraform Destroy Workflow](screenshots/03_destroy_workflow.png)
 
 ---
 

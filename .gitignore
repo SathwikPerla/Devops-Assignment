@@ -3,13 +3,21 @@
 
 # Documents
 *.docx
+*.DOCX
 *.doc
+*.DOC
 docs/
+Docs/
 doc/
+Doc/
 DevOps Homework.docx
 
 # Instructor / Ma'am repository & folders
 devops-heros-OG/
 mam/
+Mam/
 maam/
+Maam/
 mam*/
+Mam*/
+

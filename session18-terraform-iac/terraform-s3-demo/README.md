@@ -63,6 +63,8 @@ Initializing provider plugins...
 Terraform has been successfully initialized!
 ```
 
+![Terraform Init Screenshot](screenshots/01_terraform_init.png)
+
 ---
 
 ### Step 2: Format Code (`terraform fmt`)
@@ -78,6 +80,8 @@ provider.tf
 outputs.tf
 ```
 
+![Terraform Format Screenshot](screenshots/02_terraform_fmt.png)
+
 ---
 
 ### Step 3: Validate Syntax & Semantics (`terraform validate`)
@@ -89,6 +93,8 @@ Output:
 ```text
 Success! The configuration is valid.
 ```
+
+![Terraform Validate Screenshot](screenshots/03_terraform_validate.png)
 
 ---
 
@@ -125,6 +131,8 @@ Terraform will perform the following actions:
 Plan: 3 to add, 0 to change, 0 to destroy.
 ```
 
+![Terraform Plan Screenshot](screenshots/04_terraform_plan.png)
+
 ---
 
 ### Step 5: Provision Infrastructure (`terraform apply`)
@@ -148,6 +156,8 @@ bucket_arn = "arn:aws:s3:::sathwik-devops-s3-demo-bucket-2026"
 bucket_id = "sathwik-devops-s3-demo-bucket-2026"
 bucket_region = "ap-south-1"
 ```
+
+![Terraform Apply Screenshot](screenshots/05_terraform_apply.png)
 
 ---
 
@@ -174,6 +184,8 @@ resource "aws_s3_bucket" "demo" {
 }
 ```
 
+![Terraform Show Screenshot](screenshots/06_terraform_show.png)
+
 ---
 
 ### Step 7: Query Defined Outputs (`terraform output`)
@@ -187,6 +199,8 @@ bucket_arn = "arn:aws:s3:::sathwik-devops-s3-demo-bucket-2026"
 bucket_id = "sathwik-devops-s3-demo-bucket-2026"
 bucket_region = "ap-south-1"
 ```
+
+![Terraform Output Screenshot](screenshots/07_terraform_output.png)
 
 ---
 
@@ -206,6 +220,8 @@ aws_s3_bucket.demo: Destruction complete after 2s
 
 Destroy complete! Resources: 3 destroyed.
 ```
+
+![Terraform Destroy Screenshot](screenshots/08_terraform_destroy.png)
 
 ---
 

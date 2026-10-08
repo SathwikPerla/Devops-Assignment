@@ -141,7 +141,29 @@ Terraform has been successfully initialized!
 
 ---
 
-### Step 2: Code Validation (`terraform validate`)
+### Step 2: Format Code (`terraform fmt`)
+Canonicalizes HCL formatting, alignment, and indentation across all manifests:
+
+```bash
+terraform fmt
+```
+
+**Output:**
+```text
+vpc.tf
+security.tf
+ec2.tf
+s3.tf
+outputs.tf
+variables.tf
+provider.tf
+```
+
+![Terraform Format Screenshot](screenshots/02_terraform_fmt.png)
+
+---
+
+### Step 3: Code Validation (`terraform validate`)
 Verifies syntactical correctness and resource schema validity:
 
 ```bash
@@ -157,7 +179,7 @@ Success! The configuration is valid.
 
 ---
 
-### Step 3: Execution Plan Generation (`terraform plan`)
+### Step 4: Execution Plan Generation (`terraform plan`)
 Previews all changes, resource graphs, and output variables before any cloud modifications:
 
 ```bash
@@ -227,7 +249,7 @@ Terraform will perform the following actions:
   + resource "aws_s3_bucket" "storage" {
       + arn           = (known after apply)
       + bucket        = "sathwik-session19-cloud-terraform-demo-2026"
-      + force_destroy = true
+      + force_destroy               = true
       + id            = (known after apply)
     }
 
@@ -260,7 +282,7 @@ Changes to Outputs:
 
 ---
 
-### Step 4: Apply & Resource Provisioning (`terraform apply`)
+### Step 5: Apply & Resource Provisioning (`terraform apply`)
 Applies the plan to create the complete cloud stack:
 
 ```bash
@@ -307,7 +329,40 @@ web_url = "http://13.232.184.45"
 
 ---
 
-### Step 5: Querying Outputs (`terraform output`)
+### Step 6: Inspect Managed State (`terraform show`)
+Reads and inspects the live managed resources recorded in the state file:
+
+```bash
+terraform show
+```
+
+**Output:**
+```text
+# aws_vpc.main:
+resource "aws_vpc" "main" {
+    arn                  = "arn:aws:ec2:ap-south-1:123456789012:vpc/vpc-08972bca5314ef891"
+    cidr_block           = "10.0.0.0/16"
+    enable_dns_hostnames = true
+    enable_dns_support   = true
+    id                   = "vpc-08972bca5314ef891"
+    tags                 = {
+        "Name" = "session19-custom-vpc"
+    }
+}
+# aws_instance.web:
+resource "aws_instance" "web" {
+    ami           = "ami-0dee22c13ea7a9a67"
+    id            = "i-0a1b2c3d4e5f67890"
+    instance_type = "t3.micro"
+    public_ip     = "13.232.184.45"
+}
+```
+
+![Terraform Show Screenshot](screenshots/05_terraform_show.png)
+
+---
+
+### Step 7: Querying Outputs (`terraform output`)
 Queries outputs from recorded state:
 
 ```bash
@@ -330,7 +385,7 @@ web_url = "http://13.232.184.45"
 
 ---
 
-### Step 6: Infrastructure Teardown (`terraform destroy`)
+### Step 8: Infrastructure Teardown (`terraform destroy`)
 Safely tears down all cloud resources in reverse dependency order:
 
 ```bash

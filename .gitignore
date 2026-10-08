@@ -1,0 +1,15 @@
+# OS files
+.DS_Store
+
+# Documents
+*.docx
+*.doc
+docs/
+doc/
+DevOps Homework.docx
+
+# Instructor / Ma'am repository & folders
+devops-heros-OG/
+mam/
+maam/
+mam*/
